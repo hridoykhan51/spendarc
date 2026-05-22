@@ -29,6 +29,7 @@ class SummaryBloc extends Bloc<SummaryEvent, SummaryState> {
     Emitter<SummaryState> emit,
   ) async {
     await _subscription?.cancel();
+    // Summary stays decoupled from TransactionsBloc by reacting to repository updates.
     _subscription = _repository.watchTransactions().listen(
       (transactions) => add(SummaryTransactionsChanged(transactions)),
     );

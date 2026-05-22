@@ -28,6 +28,7 @@ class TransactionRepositoryImpl implements TransactionRepository {
   Future<Either<Failure, List<FinanceTransaction>>> getTransactions() async {
     try {
       final local = await _local.loadTransactions();
+      // Offline-first: show cached data immediately and reconcile in background.
       unawaited(syncPending());
       return right(local.where((item) => !item.deleted).toList());
     } on Object catch (error) {
@@ -44,6 +45,7 @@ class TransactionRepositoryImpl implements TransactionRepository {
         transaction,
       ).copyWith(synced: false, deleted: false);
       await _local.upsert(model);
+      // Unsynced local rows are the durable write queue until remote push succeeds.
       unawaited(syncPending());
       return right(model);
     } on Object catch (error) {
@@ -64,6 +66,7 @@ class TransactionRepositoryImpl implements TransactionRepository {
         updatedAt: DateTime.now(),
       );
       await _local.upsert(deleted);
+      // Soft-delete locally so the delete can still be synced while offline.
       unawaited(syncPending());
       return right(deleted);
     } on Object catch (error) {

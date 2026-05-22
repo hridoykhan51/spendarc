@@ -74,6 +74,7 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
   ) async {
     final previous = state.transactions;
     final optimistic = _visibleSorted([event.transaction, ...previous]);
+    // Optimistic UI: commit visually first, then rollback on write failure.
     emit(
       state.copyWith(
         status: TransactionsStatus.success,
@@ -107,6 +108,7 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
     Emitter<TransactionsState> emit,
   ) async {
     final previous = state.transactions;
+    // Remove immediately for perceived speed; restore previous list if delete fails.
     emit(
       state.copyWith(
         transactions: previous.where((item) => item.id != event.id).toList(),

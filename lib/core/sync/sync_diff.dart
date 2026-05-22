@@ -17,6 +17,7 @@ class SyncDiffInput {
 }
 
 Future<SyncDiffResult> calculateSyncDiff(SyncDiffInput input) {
+  // Diffing may grow with transaction count, so keep merge work off the UI isolate.
   return Isolate.run(() => _calculateSyncDiffOnIsolate(input));
 }
 
@@ -30,6 +31,7 @@ SyncDiffResult _calculateSyncDiffOnIsolate(SyncDiffInput input) {
 
   for (final local in input.local) {
     final remote = byId[local.id];
+    // Last-write-wins conflict resolution based on updatedAt timestamps.
     if (remote == null || local.updatedAt.isAfter(remote.updatedAt)) {
       byId[local.id] = local.copyWith(synced: true);
       final remoteUpdatedAt = remote?.updatedAt ?? DateTime(0);
