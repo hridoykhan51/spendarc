@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class SpendingLineChart extends StatelessWidget {
@@ -91,7 +92,7 @@ class SpendingLineChartPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant SpendingLineChartPainter oldDelegate) {
-    return oldDelegate.values != values ||
+    return !listEquals(oldDelegate.values, values) ||
         oldDelegate.color != color ||
         oldDelegate.gridColor != gridColor;
   }
